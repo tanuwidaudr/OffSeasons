@@ -9,13 +9,16 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 
-public class UseData extends Activity implements View.OnClickListener {
+public class UseData extends Activity implements View.OnClickListener, Serializable {
 	
 	//private TextView texted = null;
 	private ListView texted = null;
-	private ArrayList<String> restaurants = new ArrayList<String>();
+	private ArrayList<String> restaurantnames = new ArrayList<String>();
+	private ArrayList<Restaurant> restaurants = new ArrayList<Restaurant>();
 
 	private ArrayAdapter<String> adapt = null;
 
@@ -33,14 +36,22 @@ public class UseData extends Activity implements View.OnClickListener {
 		texted = (ListView)findViewById(R.id.hello);
 		
 		//get ArrayList from intent object
-		restaurants = getIntent().getStringArrayListExtra("list");
+		//restaurantnames = getIntent().getStringArrayListExtra("list");
+
+		Bundle bundleObject = getIntent().getExtras();
+		restaurants = (ArrayList<Restaurant>) bundleObject.getSerializable("restaurantlist");
+		for (int i=0; i<restaurants.size(); i++) {
+			String name = restaurants.get(i).getName();
+			restaurantnames.add(name);
+		}
 		
 		//write data to UI
 		/*for (int i=0; i<restaurants.size(); i++) {
 			//texted.append(restaurants.get(i) + "\n");
 			texted.append(restaurants.get(i) + "\n");
 		}*/
-		adapt = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,restaurants);
+		adapt = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,restaurantnames);
+		//adapt = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,restaurants);
 		texted.setAdapter(adapt);
 		adapt.notifyDataSetChanged();
 	}
