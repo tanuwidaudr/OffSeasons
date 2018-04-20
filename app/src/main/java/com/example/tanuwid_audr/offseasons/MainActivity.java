@@ -8,16 +8,19 @@ import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.sql.*;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements View.OnClickListener {
 
     private Thread t = null;
     private ArrayList<String> list = new ArrayList<String>();
 
+    //restaurant variables
     private String name;
     private String address;
     private String city;
@@ -26,15 +29,27 @@ public class MainActivity extends Activity {
     private String phone;
     private String website;
 
+    private Button nameButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        nameButton = (Button)findViewById(R.id.namebutton);
+        nameButton.setOnClickListener(this);
+
         //Start Thread
         t = new Thread(background);
         t.start();
 
+    }
+
+    public void onClick(View v) {
+        Toast.makeText(MainActivity.this, "We're in main activity.", Toast.LENGTH_LONG).show();
+        Intent intent1 = new Intent(MainActivity.this, UseData.class);
+        intent1.putStringArrayListExtra("list", list);
+        startActivity(intent1);
     }
 
     private Runnable background = new Runnable() {
@@ -77,9 +92,9 @@ public class MainActivity extends Activity {
 
                 //create intent, place ArrayList on intent object,
                 //request another activity to be started to use data
-                Intent intent = new Intent(MainActivity.this, UseData.class);
-                intent.putStringArrayListExtra("list", list);
-                startActivity(intent);
+                //Intent intent = new Intent(MainActivity.this, UseData.class);
+                //intent.putStringArrayListExtra("list", list);
+                //startActivity(intent);
 
                 //clean up
                 t = null;
