@@ -1,10 +1,12 @@
 package com.example.tanuwid_audr.offseasons;
 
+import java.io.Serializable;
+
 /**
  * Created by TANUWID_AUDR on 4/19/2018.
  */
 
-public class Restaurant {
+public class Restaurant implements Serializable {
 
     private String name;
     private String address;

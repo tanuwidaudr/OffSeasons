@@ -12,13 +12,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.sql.*;
 
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends Activity implements View.OnClickListener, Serializable {
 
     private Thread t = null;
     private ArrayList<String> list = new ArrayList<String>();
+    private ArrayList<Restaurant> restaurantlist = new ArrayList<Restaurant>();
 
     //restaurant variables
     private String name;
@@ -48,7 +50,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
     public void onClick(View v) {
         Toast.makeText(MainActivity.this, "We're in main activity.", Toast.LENGTH_LONG).show();
         Intent intent1 = new Intent(MainActivity.this, UseData.class);
-        intent1.putStringArrayListExtra("list", list);
+        //intent1.putStringArrayListExtra("list", list);
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("restaurantlist", restaurantlist);
+        intent1.putExtras(bundle);
         startActivity(intent1);
     }
 
@@ -86,7 +91,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
                    phone = result.getString("Phone");
                    website = result.getString("Website");
                    Restaurant restaurant = new Restaurant(name, address, city, state, zip, phone, website);
-                   list.add(restaurant.getName());
+                   //list.add(restaurant.getName());
+                   restaurantlist.add(restaurant);
                    Log.e("JDBC", name + " added." );
                 }
 
