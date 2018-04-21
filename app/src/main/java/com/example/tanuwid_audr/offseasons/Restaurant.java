@@ -1,6 +1,7 @@
 package com.example.tanuwid_audr.offseasons;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by TANUWID_AUDR on 4/19/2018.
@@ -8,6 +9,7 @@ import java.io.Serializable;
 
 public class Restaurant implements Serializable {
 
+    private int id;
     private String name;
     private String address;
     private String city;
@@ -15,6 +17,10 @@ public class Restaurant implements Serializable {
     private String zip;
     private String phone;
     private String website;
+    private List<String> categories;
+
+    public int getId() { return id;}
+    public void setId(int id) {this.id = id;}
 
     public String getName() {
         return name;
@@ -26,9 +32,7 @@ public class Restaurant implements Serializable {
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
 
-    public String getcity() {
-        return city;
-    }
+    public String getCity() { return city; }
     public void setCity(String city) {
         this.city = city;
     }
@@ -59,8 +63,12 @@ public class Restaurant implements Serializable {
         this.website = website;
     }
 
-    public Restaurant(String name, String address, String city, String state, String zip, String phone, String website) {
+    public List<String> getCategories() {return categories;}
+    public void setCategories(List<String> categories) {this.categories = categories;}
+
+    public Restaurant(int id, String name, String address, String city, String state, String zip, String phone, String website) {
         super();
+        this.id = id;
         this.name = name;
         this.address = address;
         this.city = city;
@@ -68,6 +76,7 @@ public class Restaurant implements Serializable {
         this.zip = zip;
         this.phone = phone;
         this.website = website;
+        this.categories = categories;
     }
 
     @Override
