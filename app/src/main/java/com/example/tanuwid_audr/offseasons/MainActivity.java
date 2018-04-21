@@ -15,14 +15,16 @@ import android.widget.Toast;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.sql.*;
+import java.util.List;
 
 public class MainActivity extends Activity implements View.OnClickListener, Serializable {
 
     private Thread t = null;
-    private ArrayList<String> list = new ArrayList<String>();
     private ArrayList<Restaurant> restaurantlist = new ArrayList<Restaurant>();
+    private List<String> categories = new ArrayList<>();
 
     //restaurant variables
+    private int id;
     private String name;
     private String address;
     private String city;
@@ -30,6 +32,9 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
     private String zip;
     private String phone;
     private String website;
+
+    private String category;
+
 
     private Button nameButton;
     private Button catButton;
@@ -54,7 +59,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
     public void onClick(View v) {
         switch(v.getId()){
             case R.id.namebutton:
-                Toast.makeText(MainActivity.this, "We're in main activity.", Toast.LENGTH_LONG).show();
+                //Toast.makeText(MainActivity.this, "We're in main activity.", Toast.LENGTH_LONG).show();
                 Intent intent1 = new Intent(MainActivity.this, UseData.class);
                 //intent1.putStringArrayListExtra("list", list);
                 Bundle bundle = new Bundle();
@@ -63,7 +68,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
                 startActivity(intent1);
                 break;
             case R.id.categorybutton:
-                setContentView(R.layout.individual_layout);
+                //setContentView(R.layout.individual_layout);
                 break;
 
         }
@@ -85,17 +90,22 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
             }
 
             Statement stmt = null;
+            //Statement stmt2 = null;
             Connection con = null;
 
             //create connection and statement objects
             try {
                 con = DriverManager.getConnection(URL, username, password);
                 stmt = con.createStatement();
-
                 ResultSet result = stmt.executeQuery("select * from restaurants order by RestaurantName;");
+
+                PreparedStatement restCats = null;
+                String SQL = "SELECT CategoryName FROM Category INNER JOIN RestaurantCategory ON Category.CategoryID = RestaurantCategory.Category INNER JOIN Restaurants ON RestaurantCategory.Restaurant = Restaurants.RestaurantID WHERE Restaurants.RestaurantID=? ORDER BY CategoryName";
+                restCats = con.prepareStatement(SQL);
 
                 //read result set, write data to ArrayList and Log
                 while (result.next()) {
+                   id = result.getInt("RestaurantID");
                    name = result.getString("RestaurantName");
                    address = result.getString("StreetAddress");
                    city = result.getString("City");
@@ -103,11 +113,29 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
                    zip = result.getString("ZIP");
                    phone = result.getString("Phone");
                    website = result.getString("Website");
-                   Restaurant restaurant = new Restaurant(name, address, city, state, zip, phone, website);
-                   //list.add(restaurant.getName());
-                   restaurantlist.add(restaurant);
+
+                    Restaurant restaurant = new Restaurant(id, name, address, city, state, zip, phone, website);
+                    restaurantlist.add(restaurant);
+
                    Log.e("JDBC", name + " added." );
                 }
+
+
+                //Set RestaurantID into prepared statement
+                for (int i = 0; i < restaurantlist.size(); i++) {
+                    int currentID = restaurantlist.get(i).getId();
+                    restCats.setInt(1, currentID);
+                    ResultSet getCategories = restCats.executeQuery();
+
+                    while(getCategories.next()) {
+                        category = getCategories.getString("CategoryName");
+                        categories.add(category);
+                    }
+                    restaurantlist.get(i).setCategories(categories);
+                    Log.e("JDBC", categories + " added." );
+                }
+
+
 
                 //create intent, place ArrayList on intent object,
                 //request another activity to be started to use data
@@ -121,7 +149,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
             } catch (SQLException e) {
                 Log.e("JDBC","problems with SQL sent to "+URL+
                         ": "+e.getMessage());
-                Toast.makeText(MainActivity.this, "Problems with SQL sent to URL", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(MainActivity.this, "Problems with SQL sent to URL", Toast.LENGTH_SHORT).show();
             }
 
             finally {
@@ -130,7 +158,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
                         con.close();
                 } catch (SQLException e) {
                     Log.e("JDBC", "close connection failed");
-                    Toast.makeText(MainActivity.this, "Close connection failed", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(MainActivity.this, "Close connection failed", Toast.LENGTH_SHORT).show();
                 }
             }
 
