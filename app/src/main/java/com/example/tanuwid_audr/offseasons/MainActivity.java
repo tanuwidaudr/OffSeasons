@@ -32,6 +32,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
     private String website;
 
     private Button nameButton;
+    private Button catButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +42,9 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
         nameButton = (Button)findViewById(R.id.namebutton);
         nameButton.setOnClickListener(this);
 
+        catButton = (Button)findViewById(R.id.categorybutton);
+        catButton.setOnClickListener(this);
+
         //Start Thread
         t = new Thread(background);
         t.start();
@@ -48,13 +52,22 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
     }
 
     public void onClick(View v) {
-        Toast.makeText(MainActivity.this, "We're in main activity.", Toast.LENGTH_LONG).show();
-        Intent intent1 = new Intent(MainActivity.this, UseData.class);
-        //intent1.putStringArrayListExtra("list", list);
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("restaurantlist", restaurantlist);
-        intent1.putExtras(bundle);
-        startActivity(intent1);
+        switch(v.getId()){
+            case R.id.namebutton:
+                Toast.makeText(MainActivity.this, "We're in main activity.", Toast.LENGTH_LONG).show();
+                Intent intent1 = new Intent(MainActivity.this, UseData.class);
+                //intent1.putStringArrayListExtra("list", list);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("restaurantlist", restaurantlist);
+                intent1.putExtras(bundle);
+                startActivity(intent1);
+                break;
+            case R.id.categorybutton:
+                setContentView(R.layout.individual_layout);
+                break;
+
+        }
+
     }
 
     private Runnable background = new Runnable() {
