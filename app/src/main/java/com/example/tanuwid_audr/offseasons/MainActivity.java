@@ -21,7 +21,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
 
     private Thread t = null;
     private ArrayList<Restaurant> restaurantlist = new ArrayList<Restaurant>();
-    private List<String> categories = new ArrayList<>();
 
     //restaurant variables
     private int id;
@@ -32,8 +31,9 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
     private String zip;
     private String phone;
     private String website;
+    private double latitude;
+    private double longitude;
 
-    private String category;
 
 
     private Button nameButton;
@@ -42,12 +42,12 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.landing_page);
 
-        nameButton = (Button)findViewById(R.id.namebutton);
+        nameButton = (Button)findViewById(R.id.landingPageName);
         nameButton.setOnClickListener(this);
 
-        catButton = (Button)findViewById(R.id.categorybutton);
+        catButton = (Button)findViewById(R.id.landingPageCategory);
         catButton.setOnClickListener(this);
 
         //Start Thread
@@ -58,7 +58,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
 
     public void onClick(View v) {
         switch(v.getId()){
-            case R.id.namebutton:
+            case R.id.landingPageName:
                 //Toast.makeText(MainActivity.this, "We're in main activity.", Toast.LENGTH_LONG).show();
                 Intent intent1 = new Intent(MainActivity.this, UseData.class);
                 //intent1.putStringArrayListExtra("list", list);
@@ -67,7 +67,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
                 intent1.putExtras(bundle);
                 startActivity(intent1);
                 break;
-            case R.id.categorybutton:
+            case R.id.landingPageCategory:
                 //setContentView(R.layout.individual_layout);
                 break;
 
@@ -103,6 +103,10 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
                 String SQL = "SELECT CategoryName FROM Category INNER JOIN RestaurantCategory ON Category.CategoryID = RestaurantCategory.Category INNER JOIN Restaurants ON RestaurantCategory.Restaurant = Restaurants.RestaurantID WHERE Restaurants.RestaurantID=? ORDER BY CategoryName";
                 restCats = con.prepareStatement(SQL);
 
+                PreparedStatement getLocation = null;
+                String SQL2 = "SELECT Latitude, Longitude FROM Location WHERE Restaurant=?";
+                getLocation = con.prepareStatement(SQL2);
+
                 //read result set, write data to ArrayList and Log
                 while (result.next()) {
                    id = result.getInt("RestaurantID");
@@ -126,13 +130,29 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
                     int currentID = restaurantlist.get(i).getId();
                     restCats.setInt(1, currentID);
                     ResultSet getCategories = restCats.executeQuery();
+                    List<String> categories = new ArrayList<>();
 
                     while(getCategories.next()) {
-                        category = getCategories.getString("CategoryName");
+                        String category = getCategories.getString("CategoryName");
                         categories.add(category);
                     }
                     restaurantlist.get(i).setCategories(categories);
+
                     Log.e("JDBC", categories + " added." );
+                }
+
+                for (int a = 0; a < restaurantlist.size(); a++) {
+                    int currentID = restaurantlist.get(a).getId();
+                    getLocation.setInt(1, currentID);
+                    ResultSet getLatAndLong = getLocation.executeQuery();
+
+                    while(getLatAndLong.next()) {
+                        latitude = getLatAndLong.getDouble("Latitude");
+                        longitude = getLatAndLong.getDouble("Longitude");
+                    }
+
+                    restaurantlist.get(a).setLatitude(latitude);
+                    restaurantlist.get(a).setLongitude(longitude);
                 }
 
 

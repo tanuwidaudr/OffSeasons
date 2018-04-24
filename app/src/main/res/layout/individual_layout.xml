@@ -9,54 +9,84 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="OffSeasons"
-        android:textSize="50sp"/>
+        android:fontFamily="@font/segoesc"
+        android:textColor="#334EFF"
+        android:textSize="45sp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="15sp"/>
 
     <TextView
         android:id="@+id/RestaurantName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="Restaurant Name"
-        android:textSize="25sp"/>
+        android:fontFamily="@font/segoesc"
+        android:textAlignment="center"
+        android:textColor="#FF5833"
+        android:textSize="30sp"/>
     <TextView
         android:id="@+id/Category"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="Cuisine Type"
-        android:textSize="25sp"/>
+        android:textAlignment="center"
+        android:fontFamily="@font/segoesc"
+        android:textColor="#FF5833"
+        android:textSize="30sp"/>
     <TextView
         android:id="@+id/Rating"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="Rating"
+        android:textAlignment="center"
+        android:fontFamily="@font/segoesc"
         android:textSize="25sp"/>
     <TextView
         android:id="@+id/Address"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="Address"
+        android:fontFamily="@font/segoesc"
+        android:textSize="25sp"/>
+    <TextView
+        android:id="@+id/Address2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:hint="Address2"
+        android:textAlignment="center"
+        android:fontFamily="@font/segoesc"
         android:textSize="25sp"/>
     <TextView
         android:id="@+id/Phone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:hint="Phone"
+        android:textAlignment="center"
+        android:fontFamily="@font/segoesc"
         android:textSize="25sp"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="25sp"/>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
-        <Button
+        <ImageButton
             android:id="@+id/PhoneButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Button
+            android:layout_width="100dp"
+            android:layout_height="75dp" />
+        <ImageButton
             android:id="@+id/WebButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <Button
+            android:layout_width="100dp"
+            android:layout_height="75dp" />
+        <ImageButton
             android:id="@+id/MapButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_width="100dp"
+            android:layout_height="75dp" />
 
     </LinearLayout>
 

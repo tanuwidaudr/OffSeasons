@@ -51,6 +51,7 @@
             android:id="@+id/hello"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:background="#DCDCDC"
             android:lines="40"/>
 
     </LinearLayout>

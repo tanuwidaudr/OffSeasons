@@ -18,6 +18,8 @@ public class Restaurant implements Serializable {
     private String phone;
     private String website;
     private List<String> categories;
+    private double latitude;
+    private double longitude;
 
     public int getId() { return id;}
     public void setId(int id) {this.id = id;}
@@ -65,6 +67,12 @@ public class Restaurant implements Serializable {
 
     public List<String> getCategories() {return categories;}
     public void setCategories(List<String> categories) {this.categories = categories;}
+
+    public double getLatitude() {return latitude;}
+    public void setLatitude(double latitude) {this.latitude = latitude;}
+
+    public double getLongitude() {return longitude;}
+    public void setLongitude(double longitude) {this.longitude = longitude;}
 
     public Restaurant(int id, String name, String address, String city, String state, String zip, String phone, String website) {
         super();
