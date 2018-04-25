@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Name Button -->
+        <Button
+            android:id="@+id/namebutton2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Name"
+            android:layout_weight="1"/>
+
+        <!-- Category Button -->
+        <Button
+            android:id="@+id/categorybutton2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Category"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/categoryList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="#DCDCDC"
+        android:lines="22"/>
+
+    </LinearLayout>
+
+</android.support.constraint.ConstraintLayout>

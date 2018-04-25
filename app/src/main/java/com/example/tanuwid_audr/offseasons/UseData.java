@@ -27,9 +27,14 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
 	private ListView listView;
 	private EditText searchbox;
 
+	//filter variables
+    private String searchfilter;
+	private ArrayList<Integer> hiddenrestaurants = new ArrayList<>();
+    private Button nameButton, goButton, clearButton;
+
 	private ArrayAdapter<String> adapt = null;
 
-	private Button nameButton;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +46,14 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
 
         nameButton = (Button) findViewById(R.id.namebutton);
         nameButton.setOnClickListener(this);
+
+        searchbox = (EditText) findViewById(R.id.searchbox);
+
+        goButton = (Button) findViewById(R.id.gobutton);
+        goButton.setOnClickListener(this);
+
+        clearButton = (Button) findViewById(R.id.clearbutton);
+        clearButton.setOnClickListener(this);
 
         Bundle bundleObject = getIntent().getExtras();
         restaurants = (ArrayList<Restaurant>) bundleObject.getSerializable("restaurantlist");
@@ -68,7 +81,27 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
     }
 
 	public void onClick(View v) {
-		Toast.makeText(UseData.this, "We're in use data activity.", Toast.LENGTH_LONG).show();
+		switch (v.getId()) {
+            case R.id.namebutton:
+                Toast.makeText(UseData.this, "We're in use data activity.", Toast.LENGTH_LONG).show();
+                break;
+            case R.id.gobutton:
+                //Toast.makeText(UseData.this, "Made it to go button.", Toast.LENGTH_LONG).show();
+                searchfilter = searchbox.getText().toString();
+                if (searchfilter.matches("")) {
+                    Toast.makeText(UseData.this, "Searchbox is empty", Toast.LENGTH_LONG).show();
+                }
+                else {
+                    //for (int i=0; i < restaurantnames.size(); i++) {
+                        Toast.makeText(UseData.this, "Searchbox is filled", Toast.LENGTH_LONG).show();
+                        //test
+                    //}
+                }
+                break;
+            case R.id.clearbutton:
+                Toast.makeText(UseData.this, "Made it to clear button.", Toast.LENGTH_LONG).show();
+                break;
+        }
 	}
 
 	@Override
@@ -83,5 +116,7 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
 	    startActivity(individualView);
 
     }
+
+
 
 }

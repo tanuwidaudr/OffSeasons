@@ -21,6 +21,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
 
     private Thread t = null;
     private ArrayList<Restaurant> restaurantlist = new ArrayList<Restaurant>();
+    private ArrayList<Category> categoryList = new ArrayList<Category>();
 
     //restaurant variables
     private int id;
@@ -33,7 +34,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
     private String website;
     private double latitude;
     private double longitude;
-
+    private String category;
 
 
     private Button nameButton;
@@ -59,7 +60,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
     public void onClick(View v) {
         switch(v.getId()){
             case R.id.landingPageName:
-                //Toast.makeText(MainActivity.this, "We're in main activity.", Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "Loading Restaurants", Toast.LENGTH_LONG).show();
                 Intent intent1 = new Intent(MainActivity.this, UseData.class);
                 //intent1.putStringArrayListExtra("list", list);
                 Bundle bundle = new Bundle();
@@ -68,7 +69,15 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
                 startActivity(intent1);
                 break;
             case R.id.landingPageCategory:
-                //setContentView(R.layout.individual_layout);
+                Toast.makeText(MainActivity.this, "Loading Categories", Toast.LENGTH_LONG).show();
+                Intent intent2 = new Intent (MainActivity.this, CategoryView.class);
+                Bundle bundle2 = new Bundle();
+                bundle2.putSerializable("categoryList", categoryList);
+                Bundle bundle3 = new Bundle();
+                bundle3.putSerializable("restaurantlist", restaurantlist);
+                intent2.putExtras(bundle2);
+                intent2.putExtras(bundle3);
+                startActivity(intent2);
                 break;
 
         }
@@ -96,16 +105,16 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
             //create connection and statement objects
             try {
                 con = DriverManager.getConnection(URL, username, password);
+
+                // Retrieve all restaurants
                 stmt = con.createStatement();
                 ResultSet result = stmt.executeQuery("select * from restaurants order by RestaurantName;");
 
+                //Retrieve categories from specified restaurant
                 PreparedStatement restCats = null;
                 String SQL = "SELECT CategoryName FROM Category INNER JOIN RestaurantCategory ON Category.CategoryID = RestaurantCategory.Category INNER JOIN Restaurants ON RestaurantCategory.Restaurant = Restaurants.RestaurantID WHERE Restaurants.RestaurantID=? ORDER BY CategoryName";
                 restCats = con.prepareStatement(SQL);
 
-                PreparedStatement getLocation = null;
-                String SQL2 = "SELECT Latitude, Longitude FROM Location WHERE Restaurant=?";
-                getLocation = con.prepareStatement(SQL2);
 
                 //read result set, write data to ArrayList and Log
                 while (result.next()) {
@@ -141,6 +150,11 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
                     Log.e("JDBC", categories + " added." );
                 }
 
+                // SQL Query for Retrieving restaurant locations
+                PreparedStatement getLocation = null;
+                String SQL2 = "SELECT Latitude, Longitude FROM Location WHERE Restaurant=?";
+                getLocation = con.prepareStatement(SQL2);
+
                 for (int a = 0; a < restaurantlist.size(); a++) {
                     int currentID = restaurantlist.get(a).getId();
                     getLocation.setInt(1, currentID);
@@ -155,15 +169,17 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
                     restaurantlist.get(a).setLongitude(longitude);
                 }
 
+                // Retrieve all categories
+                stmt = con.createStatement();
+                ResultSet allCategories = stmt.executeQuery("SELECT * FROM Category ORDER BY CategoryName;");
+
+                while(allCategories.next()) {
+                    category = allCategories.getString("CategoryName");
+                    Category newCategory = new Category(category);
+                    categoryList.add(newCategory);
+                }
 
 
-                //create intent, place ArrayList on intent object,
-                //request another activity to be started to use data
-                //Intent intent = new Intent(MainActivity.this, UseData.class);
-                //intent.putStringArrayListExtra("list", list);
-                //startActivity(intent);
-
-                //clean up
                 t = null;
 
             } catch (SQLException e) {

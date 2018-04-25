@@ -1,13 +1,16 @@
 package com.example.tanuwid_audr.offseasons;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.ActionBar;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -22,7 +25,7 @@ import java.util.Locale;
  * Created by JERVEY_SAMU on 4/21/2018.
  */
 
-public class IndividualView extends Activity implements Serializable, TextToSpeech.OnInitListener, View.OnClickListener {
+public class IndividualView extends AppCompatActivity implements Serializable, TextToSpeech.OnInitListener, View.OnClickListener {
     private Restaurant imports;
     private Restaurant restaurant;
 
@@ -111,6 +114,10 @@ public class IndividualView extends Activity implements Serializable, TextToSpee
         map = (ImageButton) findViewById(R.id.MapButton);
         map.setOnClickListener(this);
 
+        //hide title and icon in action bar
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowTitleEnabled(false);
+        actionBar.setDisplayUseLogoEnabled(false);
     }
 
     //speaks the contents of output
@@ -173,4 +180,29 @@ public class IndividualView extends Activity implements Serializable, TextToSpee
                 break;
         }
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle item selection
+        switch (item.getItemId()) {
+
+            case R.id.home:
+
+                return true;
+
+            case R.id.exit:
+                finishAffinity();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     }

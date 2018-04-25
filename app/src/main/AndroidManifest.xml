@@ -30,6 +30,7 @@
         <activity android:name=".UseData" android:label="UseData"> </activity>
         <activity android:name=".WebLookUp" android:label="WebLookUp"> </activity>
         <activity android:name=".IndividualView" android:label="IndividualView"> </activity>
+        <activity android:name=".CategoryView" android:label="CategoryView"> </activity>
     </application>
 
 </manifest>
