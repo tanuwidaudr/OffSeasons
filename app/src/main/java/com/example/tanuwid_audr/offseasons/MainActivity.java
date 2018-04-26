@@ -1,5 +1,6 @@
 package com.example.tanuwid_audr.offseasons;
 
+import android.media.Image;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -9,7 +10,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.Serializable;
@@ -39,6 +44,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
 
     private Button nameButton;
     private Button catButton;
+    private ImageView imageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +60,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
         //Start Thread
         t = new Thread(background);
         t.start();
+
 
     }
 

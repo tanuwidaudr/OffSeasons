@@ -72,7 +72,10 @@ public class CategoryView extends Activity implements AdapterView.OnItemClickLis
     Intent startFilterView = new Intent(CategoryView.this, FilterByCategory.class);
     Bundle bundle = new Bundle();
     bundle.putSerializable("selectedCategory", selectedCategory);
+    Bundle bundle2 = new Bundle();
+    bundle.putSerializable("restaurantlist", restaurantlist);
     startFilterView.putExtras(bundle);
+    startFilterView.putExtras(bundle2);
     startActivity(startFilterView);
 
     }

@@ -193,11 +193,13 @@ public class IndividualView extends AppCompatActivity implements Serializable, T
         switch (item.getItemId()) {
 
             case R.id.home:
-
+                finishAffinity(); // ends all other activities
+                Intent mainActivity = new Intent(IndividualView.this, MainActivity.class);
+                startActivity(mainActivity);
                 return true;
 
             case R.id.exit:
-                finishAffinity();
+                finishAffinity(); // ends all other activities
                 return true;
 
             default:
