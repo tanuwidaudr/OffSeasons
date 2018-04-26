@@ -41,6 +41,9 @@
         <activity
             android:name=".CategoryView"
             android:label="CategoryView" />
+        <activity
+            android:name=".FilterByCategory"
+            android:label="FilterByCategory"/>
         <activity android:name=".WelcomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
