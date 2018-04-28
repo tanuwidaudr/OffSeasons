@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,23 +18,24 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class UseData extends Activity implements View.OnClickListener, Serializable, AdapterView.OnItemClickListener {
 
 	private ArrayList<String> restaurantnames = new ArrayList<String>();
-	private ArrayList<Restaurant> restaurants = new ArrayList<Restaurant>();
+	private ArrayList<Restaurant> restaurantlist = new ArrayList<Restaurant>();
+	private ArrayList<Category> categoryList = new ArrayList<Category>();
+
 	private ListView listView;
 	private EditText searchbox;
 
 	//filter variables
-    private String searchfilter;
-	private ArrayList<Integer> hiddenrestaurants = new ArrayList<>();
-    private Button nameButton, goButton, clearButton;
+    private Button nameButton, categoryButton;
 
 	private ArrayAdapter<String> adapt = null;
+	private Delay delay = new Delay();
 
 
 
@@ -47,21 +50,20 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
         nameButton = (Button) findViewById(R.id.namebutton);
         nameButton.setOnClickListener(this);
 
+        categoryButton = (Button) findViewById(R.id.categorybutton);
+        categoryButton.setOnClickListener(this);
+
         searchbox = (EditText) findViewById(R.id.searchbox);
 
-        goButton = (Button) findViewById(R.id.gobutton);
-        goButton.setOnClickListener(this);
-
-        clearButton = (Button) findViewById(R.id.clearbutton);
-        clearButton.setOnClickListener(this);
-
         Bundle bundleObject = getIntent().getExtras();
-        restaurants = (ArrayList<Restaurant>) bundleObject.getSerializable("restaurantlist");
-        for (int i = 0; i < restaurants.size(); i++) {
-            String name = restaurants.get(i).getName();
+        restaurantlist = (ArrayList<Restaurant>) bundleObject.getSerializable("restaurantlist");
+        for (int i = 0; i < restaurantlist.size(); i++) {
+            String name = restaurantlist.get(i).getName();
 
             restaurantnames.add(name);
         }
+
+        categoryList = (ArrayList<Category>) bundleObject.getSerializable("categoryList");
 
         adapt = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, restaurantnames) {
             @Override
@@ -76,6 +78,18 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
         adapt.notifyDataSetChanged();
 
         searchbox = (EditText) findViewById(R.id.searchbox);
+        searchbox.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                (UseData.this).adapt.getFilter().filter(s);
+            }
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
 
 
     }
@@ -83,32 +97,21 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
 	public void onClick(View v) {
 		switch (v.getId()) {
             case R.id.namebutton:
-                Toast.makeText(UseData.this, "We're in use data activity.", Toast.LENGTH_LONG).show();
+                Toast.makeText(UseData.this, "Currently using this activity.", Toast.LENGTH_SHORT).show();
                 break;
-            case R.id.gobutton:
-                //Toast.makeText(UseData.this, "Made it to go button.", Toast.LENGTH_LONG).show();
-                searchfilter = searchbox.getText().toString();
-                if (searchfilter.matches("")) {
-                    Toast.makeText(UseData.this, "Searchbox is empty", Toast.LENGTH_LONG).show();
-                }
-                else {
-                    //for (int i=0; i < restaurantnames.size(); i++) {
-                        Toast.makeText(UseData.this, "Searchbox is filled", Toast.LENGTH_LONG).show();
-                        //test
-                    //}
-                }
-                break;
-            case R.id.clearbutton:
-                Toast.makeText(UseData.this, "Made it to clear button.", Toast.LENGTH_LONG).show();
+            case R.id.categorybutton:
+                Toast.makeText(UseData.this, "Loading Categories", Toast.LENGTH_SHORT).show();
+                Timer timer = new Timer();
+                timer.schedule(delay, 3000);
                 break;
         }
 	}
 
 	@Override
 	public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
-        Restaurant restaurant = restaurants.get(position);
+        Restaurant restaurant = restaurantlist.get(position);
         Log.e("JDBC", restaurant + " ");
-        searchbox.setText(restaurant.getName());
+        //searchbox.setText(restaurant.getName());
 	    Intent individualView = new Intent(UseData.this, IndividualView.class);
 	    Bundle bundle = new Bundle();
 	    bundle.putSerializable("restaurant", restaurant);
@@ -116,6 +119,22 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
 	    startActivity(individualView);
 
     }
+
+   class Delay extends TimerTask {
+	    @Override
+        public void run() {
+            Intent loadCategories = new Intent(UseData.this, CategoryView.class);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("categoryList", categoryList);
+            loadCategories.putExtras(bundle);
+            Bundle bundle2 = new Bundle();
+            bundle2.putSerializable("restaurantlist", restaurantlist);
+            loadCategories.putExtras(bundle2);
+            startActivity(loadCategories);
+
+        }
+
+   }
 
 
 

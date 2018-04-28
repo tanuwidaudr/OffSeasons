@@ -1,6 +1,7 @@
 package com.example.tanuwid_audr.offseasons;
 
 import android.media.Image;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -21,6 +22,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.sql.*;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends Activity implements View.OnClickListener, Serializable {
 
@@ -45,6 +48,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
     private Button nameButton;
     private Button catButton;
     private ImageView imageView;
+    private Delay delay = new Delay();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,19 +76,19 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
                 //intent1.putStringArrayListExtra("list", list);
                 Bundle bundle = new Bundle();
                 bundle.putSerializable("restaurantlist", restaurantlist);
+                Bundle bundle4 = new Bundle();
+                bundle4.putSerializable("categoryList", categoryList);
                 intent1.putExtras(bundle);
+                intent1.putExtras(bundle4);
                 startActivity(intent1);
                 break;
             case R.id.landingPageCategory:
                 Toast.makeText(MainActivity.this, "Loading Categories", Toast.LENGTH_LONG).show();
-                Intent intent2 = new Intent (MainActivity.this, CategoryView.class);
-                Bundle bundle2 = new Bundle();
-                bundle2.putSerializable("categoryList", categoryList);
-                Bundle bundle3 = new Bundle();
-                bundle3.putSerializable("restaurantlist", restaurantlist);
-                intent2.putExtras(bundle2);
-                intent2.putExtras(bundle3);
-                startActivity(intent2);
+
+                Timer timer = new Timer();
+                Log.e("Timer", "Timer has been created");
+                timer.schedule(delay, 2000);
+
                 break;
 
         }
@@ -208,4 +212,21 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
         }
     };
 
-}
+    class Delay extends TimerTask {
+        @Override
+        public void run() {
+            Log.e("Timer", "Timer code has been accessed");
+
+            Intent intent2 = new Intent (MainActivity.this, CategoryView.class);
+            Bundle bundle2 = new Bundle();
+            bundle2.putSerializable("categoryList", categoryList);
+            Bundle bundle3 = new Bundle();
+            bundle3.putSerializable("restaurantlist", restaurantlist);
+            intent2.putExtras(bundle2);
+            intent2.putExtras(bundle3);
+            startActivity(intent2);
+                }
+        }
+
+    }
+
