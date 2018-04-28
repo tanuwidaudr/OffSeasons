@@ -48,7 +48,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
     private Button nameButton;
     private Button catButton;
     private ImageView imageView;
-    private Delay delay = new Delay();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +83,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
                 break;
             case R.id.landingPageCategory:
                 Toast.makeText(MainActivity.this, "Loading Categories", Toast.LENGTH_LONG).show();
-
+                Delay delay = new Delay();
                 Timer timer = new Timer();
                 Log.e("Timer", "Timer has been created");
                 timer.schedule(delay, 2000);
@@ -144,6 +143,15 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
                    Log.e("JDBC", name + " added." );
                 }
 
+                // Retrieve all categories
+                stmt = con.createStatement();
+                ResultSet allCategories = stmt.executeQuery("SELECT * FROM Category ORDER BY CategoryName;");
+
+                while(allCategories.next()) {
+                    category = allCategories.getString("CategoryName");
+                    Category newCategory = new Category(category);
+                    categoryList.add(newCategory);
+                }
 
                 //Set RestaurantID into prepared statement
                 for (int i = 0; i < restaurantlist.size(); i++) {
@@ -180,15 +188,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
                     restaurantlist.get(a).setLongitude(longitude);
                 }
 
-                // Retrieve all categories
-                stmt = con.createStatement();
-                ResultSet allCategories = stmt.executeQuery("SELECT * FROM Category ORDER BY CategoryName;");
 
-                while(allCategories.next()) {
-                    category = allCategories.getString("CategoryName");
-                    Category newCategory = new Category(category);
-                    categoryList.add(newCategory);
-                }
 
 
                 t = null;

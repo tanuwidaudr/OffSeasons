@@ -35,7 +35,6 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
     private Button nameButton, categoryButton;
 
 	private ArrayAdapter<String> adapt = null;
-	private Delay delay = new Delay();
 
 
 
@@ -101,8 +100,9 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
                 break;
             case R.id.categorybutton:
                 Toast.makeText(UseData.this, "Loading Categories", Toast.LENGTH_SHORT).show();
+                Delay delay = new Delay();
                 Timer timer = new Timer();
-                timer.schedule(delay, 3000);
+                timer.schedule(delay, 2000);
                 break;
         }
 	}
