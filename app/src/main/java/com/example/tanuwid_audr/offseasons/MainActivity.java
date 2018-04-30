@@ -1,27 +1,23 @@
 package com.example.tanuwid_audr.offseasons;
 
-import android.media.Image;
-import android.os.Handler;
-import android.support.v7.app.AppCompatActivity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.os.Bundle;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.sql.*;
 import java.util.List;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -49,6 +45,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
     private Button catButton;
     private ImageView imageView;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +56,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
 
         catButton = (Button)findViewById(R.id.landingPageCategory);
         catButton.setOnClickListener(this);
+
+
 
         //Start Thread
         t = new Thread(background);
