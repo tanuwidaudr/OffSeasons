@@ -119,11 +119,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
                 stmt = con.createStatement();
                 ResultSet result = stmt.executeQuery("select * from restaurants order by RestaurantName;");
 
-                //Retrieve categories from specified restaurant
-                PreparedStatement restCats = null;
-                String SQL = "SELECT CategoryName FROM Category INNER JOIN RestaurantCategory ON Category.CategoryID = RestaurantCategory.Category INNER JOIN Restaurants ON RestaurantCategory.Restaurant = Restaurants.RestaurantID WHERE Restaurants.RestaurantID=? ORDER BY CategoryName";
-                restCats = con.prepareStatement(SQL);
-
 
                 //read result set, write data to ArrayList and Log
                 while (result.next()) {
@@ -151,6 +146,11 @@ public class MainActivity extends Activity implements View.OnClickListener, Seri
                     Category newCategory = new Category(category);
                     categoryList.add(newCategory);
                 }
+
+                //Retrieve categories from specified restaurant
+                PreparedStatement restCats = null;
+                String SQL = "SELECT CategoryName FROM Category INNER JOIN RestaurantCategory ON Category.CategoryID = RestaurantCategory.Category INNER JOIN Restaurants ON RestaurantCategory.Restaurant = Restaurants.RestaurantID WHERE Restaurants.RestaurantID=? ORDER BY CategoryName";
+                restCats = con.prepareStatement(SQL);
 
                 //Set RestaurantID into prepared statement
                 for (int i = 0; i < restaurantlist.size(); i++) {

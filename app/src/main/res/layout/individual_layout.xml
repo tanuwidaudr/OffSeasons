@@ -78,15 +78,21 @@
         <ImageButton
             android:id="@+id/PhoneButton"
             android:layout_width="100dp"
-            android:layout_height="75dp" />
+            android:layout_height="75dp"
+            android:src="@drawable/phone"
+            android:scaleType="fitCenter"/>
         <ImageButton
             android:id="@+id/WebButton"
             android:layout_width="100dp"
-            android:layout_height="75dp" />
+            android:layout_height="75dp"
+            android:src="@drawable/web"
+            android:scaleType="fitCenter"/>
         <ImageButton
             android:id="@+id/MapButton"
             android:layout_width="100dp"
-            android:layout_height="75dp" />
+            android:layout_height="75dp"
+            android:src="@drawable/mapmarker"
+            android:scaleType="fitCenter"/>
 
     </LinearLayout>
 

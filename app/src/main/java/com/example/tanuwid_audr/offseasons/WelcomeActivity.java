@@ -17,6 +17,7 @@ public class WelcomeActivity extends AppCompatActivity {
         setContentView(R.layout.activity_welcome);
 
         imageView = (ImageView)findViewById(R.id.logoImageView);
+        // load animation of app icon rotating and set it into imageview
         Animation animation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.welcome_animation);
         imageView.setAnimation(animation);
 
@@ -28,7 +29,7 @@ public class WelcomeActivity extends AppCompatActivity {
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                finish();
+                finish(); // end animation and transition to landing page
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
             }
 

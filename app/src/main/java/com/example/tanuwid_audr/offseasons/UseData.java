@@ -1,5 +1,6 @@
 package com.example.tanuwid_audr.offseasons;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -9,6 +10,8 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -24,6 +27,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Timer;
@@ -33,13 +42,14 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
 
 	private ArrayList<String> restaurantnames = new ArrayList<String>();
 	private ArrayList<Restaurant> restaurantlist = new ArrayList<Restaurant>();
+    ArrayList<Restaurant> searchResults = new ArrayList<Restaurant>();
 	private ArrayList<Category> categoryList = new ArrayList<Category>();
 
 	private ListView listView;
 	private EditText searchbox;
 
 	//filter variables
-    private Button nameButton, categoryButton;
+    private Button nameButton, categoryButton, goButton;
 
 	private ArrayAdapter<String> adapt = null;
 
@@ -55,14 +65,18 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
     private NotificationCompat.Builder mBuilder = null;
     private int SIMPLE_NOTFICATION_ID = 25;
 
+    //Establish thread to run SQL
+    private Thread t;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-       listView = (ListView) findViewById(R.id.hello);
-       listView.setOnItemClickListener(this);
+        // Set variables from XML
+        listView = (ListView) findViewById(R.id.hello);
+        listView.setOnItemClickListener(this);
 
         nameButton = (Button) findViewById(R.id.namebutton);
         nameButton.setOnClickListener(this);
@@ -71,7 +85,12 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
         categoryButton.setOnClickListener(this);
 
         searchbox = (EditText) findViewById(R.id.searchbox);
+        searchbox.getText();
 
+        goButton = (Button) findViewById(R.id.go);
+        goButton.setOnClickListener(this);
+
+        // Retrieve restaurants and categories from bundle and add restaurant names to array List
         Bundle bundleObject = getIntent().getExtras();
         restaurantlist = (ArrayList<Restaurant>) bundleObject.getSerializable("restaurantlist");
         for (int i = 0; i < restaurantlist.size(); i++) {
@@ -82,6 +101,7 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
 
         categoryList = (ArrayList<Category>) bundleObject.getSerializable("categoryList");
 
+        // Set array adapter to list view with restaurant names, change font color
         adapt = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, restaurantnames) {
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
@@ -94,19 +114,6 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
         listView.setAdapter(adapt);
         adapt.notifyDataSetChanged();
 
-        searchbox = (EditText) findViewById(R.id.searchbox);
-        searchbox.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                (UseData.this).adapt.getFilter().filter(s);
-            }
-            @Override
-            public void afterTextChanged(Editable s) {
-            }
-        });
 
         // Generate random restaurant for recommendation notification
         Random rand = new Random();
@@ -132,6 +139,7 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
             //channel.setVibrationPattern(new long[]{100, 200, 300, 400, 500, 400, 300, 200, 400});
             notificationManager.createNotificationChannel(channel);
         }
+            // Send restaurant to individual view im bundle
             Intent notifyIntent = new Intent(this, IndividualView.class);
             Bundle bundle = new Bundle();
             bundle.putSerializable("restaurant", restaurant);
@@ -164,23 +172,123 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
                     mBuilder.build());
         }
 
+    // When buttons are clicked
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.namebutton:
                 Toast.makeText(UseData.this, "Currently using this activity.", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.categorybutton:
+                // Event is delayed to ensure SQL has loaded fully
                 Toast.makeText(UseData.this, "Loading Categories", Toast.LENGTH_SHORT).show();
                 Delay delay = new Delay();
                 Timer timer = new Timer();
                 timer.schedule(delay, 2000);
                 break;
-        }
-    }
+            case R.id.go:
+                // Prevents user from searching with a blank String
+                if (searchbox.getText().toString().equals("")) {
+                    Toast.makeText(UseData.this, "Search field is empty.", Toast.LENGTH_SHORT).show();
+                } else {
+                // Start new thread if searchbox contains text
+                    t = new Thread(background);
+                    t.start();
+                // stop thread
+                    t = null;
 
+                }
+
+                }
+        }
+
+    // Create handler to handle message from background, message contains an array of restaurants matching the search results
+    @SuppressLint("HandlerLeak")
+    Handler handler = new Handler() {
+
+        public void handleMessage(Message msg) {
+            searchbox.setText("");
+            if (searchResults.isEmpty()) {
+                // If no results, show toast
+                Toast.makeText(UseData.this, "No results found.", Toast.LENGTH_SHORT).show();
+            } else {
+                // If results are returned, load new activity with results
+                Toast.makeText(UseData.this, "Loading results.", Toast.LENGTH_LONG).show();
+                Intent loadSearchResults = new Intent(UseData.this, SearchByName.class);
+                Bundle bundle = new Bundle();
+                bundle.putSerializable("searchResults", searchResults);
+                loadSearchResults.putExtras(bundle);
+                startActivity(loadSearchResults);
+            }
+            }
+    };
+
+	// To run SQL query
+    private  Runnable background = new Runnable() {
+        public void run() {
+            String URL = "jdbc:mysql://frodo.bentley.edu:3306/restaurants";
+            String username = "CS280";
+            String password = "CS280";
+
+            //load driver into VM memory
+            try {
+                Class.forName("com.mysql.jdbc.Driver");
+            } catch (ClassNotFoundException e) {
+                Log.e("JDBC", "Did not load driver");
+                //Toast.makeText(MainActivity.this, "Did not load driver", Toast.LENGTH_SHORT).show();
+            }
+
+            Connection con = null;
+
+            //create connection and statement objects
+            try {
+                con = DriverManager.getConnection(URL, username, password);
+
+                // Retrieve restaurants similar to searchbox content
+                PreparedStatement preparedStatement = null;
+                String SQL = "SELECT RestaurantName FROM Restaurants WHERE RestaurantName LIKE ? ORDER BY RestaurantName";
+                preparedStatement = con.prepareStatement(SQL);
+                preparedStatement.setString(1, "%" + searchbox.getText() + "%");
+                ResultSet result = preparedStatement.executeQuery();
+
+                //Clear array from previous search
+                searchResults.clear();
+
+                while(result.next()) {
+                    // Get Restaurant Name
+                    String retrievedRestaurant = result.getString("RestaurantName");
+
+                    // When name matches a restaurant in the full arrayList, add the restaurant object to search results
+                    for(int i=0; i < restaurantlist.size(); i++) {
+                        if(retrievedRestaurant.equals(restaurantlist.get(i).getName())) {
+                            searchResults.add(restaurantlist.get(i));
+                            break;
+                        }
+                    }
+
+                }
+
+                // Send search results to handler
+                Message message = handler.obtainMessage(1, searchResults);
+                handler.sendMessage(message);
+
+            } catch (SQLException e) {
+                Log.e("JDBC","problems with SQL sent to "+URL+
+                        ": "+e.getMessage());
+            }  finally {
+                try {
+                    if (con != null)
+                        con.close();
+                } catch (SQLException e) {
+                    Log.e("JDBC", "close connection failed");
+                }
+            }
+
+        }
+    };
 
     @Override
 	public void onItemClick(AdapterView<?> parent, View v, int position, long id) {
+        // When restaurant name is clicked, the restaurant from the array list in the same position is sent to individual view in a bundle
         restaurant = restaurantlist.get(position);
         Log.e("JDBC", restaurant + " ");
         //searchbox.setText(restaurant.getName());
@@ -192,6 +300,7 @@ public class UseData extends Activity implements View.OnClickListener, Serializa
 
     }
 
+   // Delays the loading of category page 
    class Delay extends TimerTask {
 	    @Override
         public void run() {

@@ -1,6 +1,7 @@
 package com.example.tanuwid_audr.offseasons;
 
 import android.annotation.SuppressLint;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.ActionBar;
 import android.content.Intent;
@@ -15,8 +16,19 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -34,6 +46,7 @@ public class IndividualView extends AppCompatActivity implements Serializable, T
     private TextView addressfield1;
     private TextView addressfield2;
     private TextView phonefield;
+    private TextView rating;
 
     private ImageButton dial;
     private ImageButton web;
@@ -47,6 +60,34 @@ public class IndividualView extends AppCompatActivity implements Serializable, T
     private static final String tag = "Widgets";
     private String name;
     private String website;
+
+    // Yelp variables
+    private final String API_KEY = "TSKoW6Rmk9zXWMZP_-t6BeC0BPTPBbFxZR3I7GYSxs6UHnMiN3hOwDeNFkvNqx3d7S5f9e4Qt7iFEoZ6b_wWE4W-k1EsHpqyBktOS4lMR4M8zcyrMzO9BMpezECgWnYx";
+
+    // API constants
+    private final String API_HOST = "https://api.yelp.com";
+    private final String SEARCH_PATH = "/v3/businesses/search";
+    private final String BUSINESS_PATH = "/v3/businesses/";  // Business ID will come after slash.
+    private final String TOKEN_PATH = "/oauth2/token";
+    private final String GRANT_TYPE = "client_credentials";
+
+    private String ACCESS_TOKEN = null;
+
+    // name of the restaurant pulled in from mySQL database passed to Yelp search
+    private String term;
+
+    // Defaults
+    private String LOCATION = "Waltham, MA";
+    private int SEARCH_LIMIT = 1;
+
+
+    //messages from background thread contain data for UI
+    Handler handler = new Handler(){
+        public void handleMessage(Message msg) {
+            String ratingTxt =(String) msg.obj;
+            rating.setText("Yelp Rating: " + ratingTxt); // set rating field to display Yelp rating
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +104,7 @@ public class IndividualView extends AppCompatActivity implements Serializable, T
         // Extract Data from bundle
         int id = imports.getId();
         name = imports.getName();
+        term = name;
         String address = imports.getAddress();
 
         String city = imports.getCity();
@@ -95,6 +137,7 @@ public class IndividualView extends AppCompatActivity implements Serializable, T
         addressfield2 = (TextView) findViewById(R.id.Address2);
         phonefield = (TextView) findViewById(R.id.Phone);
         categoriesfield = (TextView) findViewById(R.id.Category);
+        rating = (TextView) findViewById(R.id.Rating); // rating pulled in from Yelp
 
         //Display data
         namefield.setText(name);
@@ -118,7 +161,95 @@ public class IndividualView extends AppCompatActivity implements Serializable, T
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayShowTitleEnabled(false);
         actionBar.setDisplayUseLogoEnabled(false);
+
+        //start background thread
+        Thread t = new Thread(AuthToken);
+        t.start();
+
     }
+
+    Runnable AuthToken = new Runnable(){
+        public void run(){
+
+            StringBuilder builder = new StringBuilder();
+
+            InputStream is = null;
+
+            //now do search on same thread
+            String query_string = "?term=" + term + "&location=" + LOCATION + "&limit=" + SEARCH_LIMIT;
+
+            try {
+                URL url = new URL(API_HOST + SEARCH_PATH  + query_string);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
+                conn.setReadTimeout(10000 /* milliseconds */);
+                conn.setConnectTimeout(15000 /* milliseconds */);
+                conn.setRequestMethod("GET");
+                conn.setDoInput(true);
+                conn.setUseCaches(false);
+                conn.setRequestProperty("Content-Language", "en-US");
+                conn.setRequestProperty("authorization", "Bearer " + API_KEY);
+
+                // Starts the query
+                conn.connect();
+                int response = conn.getResponseCode();
+                Log.e("JSON", "The response is: " + response);
+
+                //if response code not 200, end thread
+                if (response != 200) return;
+                is = conn.getInputStream();
+
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(is));
+                String line;
+                builder = new StringBuilder();
+                while ((line = reader.readLine()) != null) {
+                    builder.append(line);
+                    Log.e("JSON", line);
+                }
+
+                // Makes sure that the InputStream is closed after the app is
+                // finished using it.
+            }	catch(IOException e) {}
+            finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch(IOException e) {}
+                }
+            }
+
+            //convert StringBuilder to String
+            String readJSONFeed = builder.toString();
+            Log.e("JSON", readJSONFeed);
+
+            //decode JSON and get search results
+            try {
+                JSONObject obj = new JSONObject(readJSONFeed);
+                JSONArray businesses = new JSONArray();
+                businesses = obj.getJSONArray("businesses");
+
+                for (int i = 0; i < businesses.length(); i++){
+
+                    JSONObject place = businesses.getJSONObject(i);
+                    String yelpRating = place.getString("rating");
+
+
+                    //sent to Handler queue
+                    Message msg = handler.obtainMessage();
+                    msg.obj = yelpRating;
+                    handler.sendMessage(msg);
+
+                    Log.e("JSON", yelpRating);
+
+                }
+
+            } catch (JSONException e) {e.getMessage();
+                e.printStackTrace();
+            }
+
+        }
+    } ;
 
     //speaks the contents of output
     public void speak(String output){
@@ -168,15 +299,18 @@ public class IndividualView extends AppCompatActivity implements Serializable, T
                 Intent map = new Intent(Intent.ACTION_VIEW,uri2);
                 if (map.resolveActivity(getPackageManager()) != null) {startActivity(map);}
                 speak("Finding " + name + " on Google maps.");
-
                 break;
             case R.id.WebButton:
-                Intent web = new Intent(this, WebLookUp.class);
-                Bundle bundle = new Bundle();
-                bundle.putSerializable("website", website);
-                web.putExtras(bundle);
-                startActivity(web);
-                speak("Finding " + name + " online");
+               if(website == null) {
+                   Toast.makeText(IndividualView.this, "No website available", Toast.LENGTH_LONG).show();
+               } else {
+                   Intent web = new Intent(this, WebLookUp.class);
+                   Bundle bundle = new Bundle();
+                   bundle.putSerializable("website", website);
+                   web.putExtras(bundle);
+                   startActivity(web);
+                   speak("Finding " + name + " online");
+               }
                 break;
         }
     }
